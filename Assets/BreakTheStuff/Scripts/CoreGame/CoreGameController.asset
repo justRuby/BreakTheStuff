@@ -1,0 +1,15 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 209dbf5d251657f4e90e899f9b9e6e71, type: 3}
+  m_Name: CoreGameController
+  m_EditorClassIdentifier: 
+  playerScore: {fileID: 11400000, guid: fbc3cd00a6afa154b804f8b687841ec3, type: 2}
+  playerHealth: {fileID: 11400000, guid: 05ddd4480a5f1ad439cbae16bd5d661c, type: 2}

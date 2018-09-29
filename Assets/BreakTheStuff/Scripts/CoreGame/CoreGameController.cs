@@ -23,6 +23,9 @@ public class CoreGameController : ScriptableObject
     public Player Player { get; private set; }
     public bool IsGameStart { get; private set; }
     public bool IsGameLose { get; private set; }
+    public bool IsSlabCanMix { get; private set; }
+
+    public bool IsMixing { get; private set; }
     #endregion
 
     #region Private
@@ -46,8 +49,8 @@ public class CoreGameController : ScriptableObject
     {
         Slabs = new Slab[MAX_SIZE, MAX_SIZE];
 
-        basePosX = 30;
-        basePosY = -30;
+        basePosX = 80;
+        basePosY = -80;
 
         fromNumber = 1;
         toNumber = MAX_SIZE * MAX_SIZE + 1;
@@ -56,6 +59,7 @@ public class CoreGameController : ScriptableObject
         _slabIndex = 1;
         _countSpawned = 25;
         IsGameStart = false;
+        IsGameLose = false;
 
         Player = new Player(3, 0);
         speedElapse = 1.5f;
@@ -77,7 +81,7 @@ public class CoreGameController : ScriptableObject
             }
 
             basePosY -= 110;
-            basePosX = 30;
+            basePosX = 80;
         }
     }
 
@@ -111,6 +115,29 @@ public class CoreGameController : ScriptableObject
         return false;
     }
 
+    public void MixingSlabs()
+    {
+        IsSlabCanMix = false;
+        IsMixing = true;
+
+        int index = 0;
+        fromNumber = Player.Score + 1;
+        toNumber = _countSpawned;
+
+        int[] replacedNumbers = Enumerable.Range(fromNumber, toNumber).ToArray();
+
+        replacedNumbers = EnumExtension.GenerateEnum(replacedNumbers, replacedNumbers.Length, 0, _countSpawned);
+
+        var search = Slabs.ToList().Where(x => x.IsAlive == true);
+
+        foreach (var slab in search)
+        {
+            slab.SetupNewIndex(replacedNumbers[index++]);
+        }
+
+        IsMixing = false;
+    }
+
     public void OnSlabClicked(int index)
     {
         if (!IsGameStart)
@@ -129,6 +156,9 @@ public class CoreGameController : ScriptableObject
             _countSpawned--;
             _currentIndex++;
             Player.AddScore(1);
+
+            if (Player.Score > 0 && Player.Score % 10 == 0)
+                IsSlabCanMix = true;
         }
         else
         {
@@ -152,18 +182,12 @@ public class CoreGameController : ScriptableObject
         yield return null;
     }
 
-    public void ReplaceSlabs()
-    {
-
-    }
-
     public void TeleportSlabsToFreeSpace()
     {
 
     }
 
-
-    #region other functions
+    #region Other functions
 
     public float DeltaTime()
     {

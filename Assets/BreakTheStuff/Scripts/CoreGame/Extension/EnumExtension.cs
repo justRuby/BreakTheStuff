@@ -16,9 +16,7 @@ namespace BreakTheStuff.CoreGame.Extension
                 numArr[j] = temp;
             }
 
-            int[] result = numArr;
-
-            return result;
+            return numArr;
         }
 
         public static List<Slab> ToList(this Slab[,] array)

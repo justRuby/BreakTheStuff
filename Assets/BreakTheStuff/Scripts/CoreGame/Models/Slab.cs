@@ -2,7 +2,7 @@
 {
     public class Slab
     {
-        public int Index { get; }
+        public int Index { get; private set; }
         public int LocalX { get; }
         public int LocalY { get; }
 
@@ -23,23 +23,35 @@
             this.IsAlive = true;
         }
 
+        public void SetupNewIndex(int index)
+        {
+            this.Index = index;
+            OnIndexChangedEvent(Index, X, Y);
+        }
+
         public void Kill()
         {
             this.IsAlive = false;
             OnKillEvent(X, Y);
         }
 
-        #region Events
 
-        public void OnKill(ValueChanged method)
+        public void OnKill(StatusChanged method)
         {
             this.OnKillEvent += method;
         }
 
-        public delegate void ValueChanged(int x, int y);
-        private event ValueChanged OnKillEvent;
+        public delegate void StatusChanged(int x, int y);
+        private event StatusChanged OnKillEvent;
 
-        #endregion
+        public void OnIndexChanged(IndexChanged method)
+        {
+            this.OnIndexChangedEvent += method;
+        }
+
+        public delegate void IndexChanged(int value, int x, int y);
+        private event IndexChanged OnIndexChangedEvent;
+
     }
 }
 

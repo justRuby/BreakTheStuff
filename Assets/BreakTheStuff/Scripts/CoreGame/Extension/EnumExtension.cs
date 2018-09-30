@@ -6,11 +6,11 @@ namespace BreakTheStuff.CoreGame.Extension
 {
     public static class EnumExtension
     {
-        public static int[] GenerateEnum(int[] numArr, int lenght, int whence, int where)
+        public static int[] GenerateEnum(this int[] numArr, int whence, int where)
         {
-            for (int i = lenght - 1; i > 1; i--)
+            for (int i = numArr.Length - 1; i > 0; i--)
             {
-                int j = Random.Range(whence, where - 1);
+                int j = Random.Range(whence, where);
                 int temp = numArr[i];
                 numArr[i] = numArr[j];
                 numArr[j] = temp;

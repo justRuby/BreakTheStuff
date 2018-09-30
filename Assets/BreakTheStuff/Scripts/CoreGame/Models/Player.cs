@@ -20,15 +20,24 @@
         public void AddScore(int value)
         {
             this.Score += value;
+            OnScoreChangedEvent(this.Score);
         }
 
-        public void OnHealthChanged(ValueChanged method)
+        public void OnHealthChanged(HealthChanged method)
         {
             this.OnHealthChangedEvent += method;
         }
 
-        public delegate void ValueChanged(int value);
-        private event ValueChanged OnHealthChangedEvent;
+        public delegate void HealthChanged(int value);
+        private event HealthChanged OnHealthChangedEvent;
+
+        public void OnScoreChanged(ScoreChanged method)
+        {
+            this.OnScoreChangedEvent += method;
+        }
+
+        public delegate void ScoreChanged(int value);
+        private event ScoreChanged OnScoreChangedEvent;
 
     }
 

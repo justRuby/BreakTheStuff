@@ -11,6 +11,7 @@ public class CoreGameViewController : MonoBehaviour {
 
     [SerializeField] GameObject slabPrefab;
     [SerializeField] GameObject healthPrefab;
+    [SerializeField] Text scoreText;
 
     [SerializeField] CoreGameController cgController;
 
@@ -24,12 +25,12 @@ public class CoreGameViewController : MonoBehaviour {
     {
         cgController.Initialize();
         cgController.Player.OnHealthChanged(OnHealthChanged);
+        cgController.Player.OnScoreChanged(OnScoreChanged);
+        cgController.GenerateFirstSlabsStack();
 
         viewSlabArray = new GameObject[cgController.MAX_SIZE, cgController.MAX_SIZE];
         viewValueSlab = new int[cgController.MAX_SIZE, cgController.MAX_SIZE];
-
         viewHealthList = new List<GameObject>();
-        cgController.GenerateFirstSlabsStack();
 
         for (int i = 0; i < cgController.MAX_SIZE; i++)
         {
@@ -66,52 +67,48 @@ public class CoreGameViewController : MonoBehaviour {
             Destroy(viewHealthList[value]);
             viewHealthList.RemoveAt(value);
         }
+        //TEST
+        else
+        {
+            viewHealthList.Add(Instantiate(healthPrefab));
+            viewHealthList[viewHealthList.Count - 1].transform.SetParent(parentHealth);
+            viewHealthList[viewHealthList.Count - 1].transform.localScale = Vector3.one;
+        }
     }
 	
     public void OnIndexChanged(int value, int x, int y)
     {
-        //Debug.Log(value);
         if(viewSlabArray[x,y] != null)
         {
             viewSlabArray[x, y].transform.Find("Text").GetComponent<Text>().text = value.ToString();
             viewValueSlab[x, y] = value;
         }
+    }
 
-        //viewSlabArray[x, y].GetComponent<Button>().onClick.RemoveAllListeners();
-        //viewSlabArray[x, y].GetComponent<Button>().onClick.AddListener(() => { cgController.OnSlabClicked(value); });
+    public void OnScoreChanged(int value)
+    {
+        scoreText.text = value.ToString();
     }
 
 	private void Update()
     {
-        if ((cgController.IsGameStart && !cgController.IsGameLose) || !cgController.IsMixing)
+        if ((cgController.IsGameStart && !cgController.IsGameLose))
         {
             if (timer < 0)
             {
                 int x, y;
-                var value = cgController.GenerateNewSlab(out x, out y);
-
-                //Debug.Log(timer);
+                var value = cgController.GenerateNewSlabV2(out x, out y);
 
                 if (value)
-                {
                     viewSlabArray[x, y] = InitializeSlab(x, y);
-                }
 
                 timer = 3f;
             }
+
             if (timer > 0)
-            {
-                //Debug.Log(timer);
-
                 timer -= cgController.DeltaTime();
-            }
-
-            if (cgController.IsSlabCanMix)
-            {
-                cgController.MixingSlabs();
-            }
         }
-	}
+    }
 
     private GameObject InitializeSlab(int x, int y)
     {
@@ -122,6 +119,7 @@ public class CoreGameViewController : MonoBehaviour {
         GameObject result = Instantiate(slabPrefab, Vector3.one, Quaternion.identity);
         result.transform.SetParent(parentSlab);
         result.transform.localScale = new Vector3(0.1f,0.1f,0.1f);
+        //result.transform.localScale = new Vector3(1f, 1f, 1f);
         result.GetComponent<RectTransform>().anchoredPosition = new Vector3(cgController.Slabs[x, y].LocalX, cgController.Slabs[x, y].LocalY, 0);
 
         result.GetComponent<Button>().onClick.AddListener(() => { cgController.OnSlabClicked(viewValueSlab[x, y]); });
@@ -134,4 +132,30 @@ public class CoreGameViewController : MonoBehaviour {
 
         return result;
     }
+
+    #region Tests
+    public void TestAddNewSlab()
+    {
+        int x, y;
+        var value = cgController.GenerateNewSlabV2(out x, out y);
+
+        if (value)
+            viewSlabArray[x, y] = InitializeSlab(x, y);
+    }
+
+    public void TestMixingSlabs()
+    {
+        cgController.MixingSlabs();
+    }
+
+    public void TestTeleportSlabs()
+    {
+
+    }
+
+    public void TestAddLife()
+    {
+        cgController.AddLife();
+    }
+    #endregion
 }

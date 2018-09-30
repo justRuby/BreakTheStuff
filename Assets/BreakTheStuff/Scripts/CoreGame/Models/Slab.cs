@@ -2,9 +2,11 @@
 {
     public class Slab
     {
+        public Coordinates Coordinates;
         public int Index { get; private set; }
-        public int LocalX { get; }
-        public int LocalY { get; }
+
+        public int LocalX { get { return Coordinates.X; } }
+        public int LocalY { get { return Coordinates.Y; } }
 
         private int X { get; set; }
         private int Y { get; set; }
@@ -13,9 +15,8 @@
 
         public Slab(int index, int localX, int localY, int x, int y)
         {
+            Coordinates = new Coordinates(localX, localY);
             this.Index = index;
-            this.LocalX = localX;
-            this.LocalY = localY;
 
             this.X = x;
             this.Y = y;
@@ -35,6 +36,10 @@
             OnKillEvent(X, Y);
         }
 
+        public void Teleport(int x, int y)
+        {
+
+        }
 
         public void OnKill(StatusChanged method)
         {

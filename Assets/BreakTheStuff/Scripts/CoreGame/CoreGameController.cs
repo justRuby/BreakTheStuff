@@ -23,60 +23,53 @@ public class CoreGameController : ScriptableObject
     public Player Player { get; private set; }
     public bool IsGameStart { get; private set; }
     public bool IsGameLose { get; private set; }
-    public bool IsSlabCanMix { get; private set; }
-
-    public bool IsMixing { get; private set; }
     #endregion
 
     #region Private
 
-    private PlayerScore playerScore;
-
-    private int basePosX;
-    private int basePosY;
-
-    private int fromNumber;
-    private int toNumber;
+    private PlayerScore _playerScore;
 
     private int _currentIndex;
     private int _slabIndex;
     private int _countSpawned;
 
-    private float speedElapse;
+    private float _speedElapse;
+    private bool _isMixing;
+    private bool _isTeleporting;
     #endregion
 
     public void Initialize()
     {
         Slabs = new Slab[MAX_SIZE, MAX_SIZE];
 
-        basePosX = 80;
-        basePosY = -80;
-
-        fromNumber = 1;
-        toNumber = MAX_SIZE * MAX_SIZE + 1;
-
         _currentIndex = 1;
-        _slabIndex = 1;
+        _slabIndex = 0;
         _countSpawned = 25;
         IsGameStart = false;
         IsGameLose = false;
 
         Player = new Player(3, 0);
-        speedElapse = 1.5f;
+        _speedElapse = 1.5f;
     }
 
     public void GenerateFirstSlabsStack()
     {
-        int[] numbers = Enumerable.Range(0, MAX_SIZE * MAX_SIZE + 1).ToArray();
+        int start = 0;
+        int end = MAX_SIZE * MAX_SIZE;
 
-        numbers = EnumExtension.GenerateEnum(numbers, numbers.Length, fromNumber, toNumber);
+        int basePosX = 80;
+        int basePosY = -80;
+
+        int[] numbers = Enumerable.Range(start + 1, end).ToArray();
+        numbers.GenerateEnum(start, end);
 
         for (int i = 0; i < MAX_SIZE; i++)
         {
             for (int j = 0; j < MAX_SIZE; j++)
             {
-                Slabs[i, j] = new Slab(numbers[_slabIndex++], basePosX, basePosY, i, j);
+                Slabs[i, j] = new Slab(numbers[_slabIndex], basePosX, basePosY, i, j);
 
+                _slabIndex++;
                 basePosX += 110;
             }
 
@@ -115,27 +108,30 @@ public class CoreGameController : ScriptableObject
         return false;
     }
 
-    public void MixingSlabs()
+    public bool GenerateNewSlabV2(out int x, out int y)
     {
-        IsSlabCanMix = false;
-        IsMixing = true;
+        x = 0;
+        y = 0;
 
-        int index = 0;
-        fromNumber = Player.Score + 1;
-        toNumber = _countSpawned;
-
-        int[] replacedNumbers = Enumerable.Range(fromNumber, toNumber).ToArray();
-
-        replacedNumbers = EnumExtension.GenerateEnum(replacedNumbers, replacedNumbers.Length, 0, _countSpawned);
-
-        var search = Slabs.ToList().Where(x => x.IsAlive == true);
-
-        foreach (var slab in search)
+        if (_countSpawned == 25)
         {
-            slab.SetupNewIndex(replacedNumbers[index++]);
+            OnLose();
+            return false;
         }
 
-        IsMixing = false;
+        List<Coordinates> cord = GetFreeSpace();
+
+        int randIndex = Random.Range(0, cord.Count);    
+
+        x = cord[randIndex].X;
+        y = cord[randIndex].Y;
+
+        _countSpawned++;
+        _slabIndex++;
+
+        Slabs[x, y] = new Slab(_slabIndex, Slabs[x, y].LocalX, Slabs[x, y].LocalY, x, y);
+
+        return true;
     }
 
     public void OnSlabClicked(int index)
@@ -158,7 +154,9 @@ public class CoreGameController : ScriptableObject
             Player.AddScore(1);
 
             if (Player.Score > 0 && Player.Score % 10 == 0)
-                IsSlabCanMix = true;
+                MixingSlabs();
+
+            return;
         }
         else
         {
@@ -172,6 +170,52 @@ public class CoreGameController : ScriptableObject
         }
     }
 
+    public void MixingSlabs()
+    {
+        _isMixing = true;
+
+        int index = 0;
+        int start = Player.Score + 1;
+        int count = _countSpawned;
+
+        int[] replacedNumbers = Enumerable.Range(start, count).ToArray();
+
+        replacedNumbers.GenerateEnum(0, count);
+
+        var search = Slabs.ToList().Where(x => x.IsAlive == true);
+
+        foreach (var slab in search)
+        {
+            slab.SetupNewIndex(replacedNumbers[index]);
+            index++;
+        }
+
+        _isMixing = false;
+    }
+
+    public void TeleportSlabs()
+    {
+        _isTeleporting = true;
+
+        //Teleport  1 - 5 slabs to free space
+        int tCount = Random.Range(0, 5);
+
+        List<Coordinates> freeSpaceCoord = GetFreeSpace();
+        List<Coordinates> reserveCoord = new List<Coordinates>();
+
+        for (int i = 0; i < tCount; i++)
+        {
+            int randIndex = Random.Range(0, freeSpaceCoord.Count);
+            reserveCoord.Add(freeSpaceCoord[randIndex]);
+            freeSpaceCoord.RemoveAt(randIndex);
+
+            //Slabs[freeSpaceCoord[i].X, freeSpaceCoord[i].Y].Teleport();
+
+        }
+
+        _isTeleporting = false;
+    }
+
     public void OnLose()
     {
         IsGameLose = true;
@@ -182,16 +226,41 @@ public class CoreGameController : ScriptableObject
         yield return null;
     }
 
-    public void TeleportSlabsToFreeSpace()
-    {
-
-    }
-
     #region Other functions
 
     public float DeltaTime()
     {
-        return Time.deltaTime * (speedElapse * Player.Score) / _countSpawned;
+        return Time.deltaTime * (_speedElapse * Player.Score) / _countSpawned;
+    }
+
+    public void AddLife()
+    {
+        Player.ApplyDamageToHealth(-1);
+    }
+
+    public List<Coordinates> GetFreeSpace()
+    {
+        List<Coordinates> coordinates = new List<Coordinates>();
+
+        for (int i = 0; i < MAX_SIZE; i++)
+        {
+            for (int j = 0; j < MAX_SIZE; j++)
+            {
+                if (Slabs[i, j].IsAlive == false)
+                {
+                    coordinates.Add(new Coordinates(i, j));
+                }
+            }
+        }
+
+        return coordinates;
+    }
+
+    public List<Coordinates> GetRandomAliveSlabs()
+    {
+        List<Coordinates> coordinates = new List<Coordinates>();
+
+        return coordinates;
     }
 
     #endregion

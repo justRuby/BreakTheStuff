@@ -1,5 +1,5 @@
 ﻿
-namespace BreakTheStuff.CoreGame.Models
+namespace BreakTheStuff.Game.Models
 {
     public class Coordinates
     {

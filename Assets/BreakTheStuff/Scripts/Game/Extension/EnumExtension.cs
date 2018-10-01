@@ -1,8 +1,8 @@
-﻿using BreakTheStuff.CoreGame.Models;
+﻿using BreakTheStuff.Game.Models;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace BreakTheStuff.CoreGame.Extension
+namespace BreakTheStuff.Game.Extension
 {
     public static class EnumExtension
     {

@@ -17,9 +17,8 @@ public class ScreenNavigationManager : MonoBehaviour {
         screenNavigation.PopAsync();
     }
 
-    public void PopAndPushScreen(string popAndPushScreenName)
+    public void ReloadScreen()
     {
-        var tempParam = popAndPushScreenName.Split('_');
-        screenNavigation.PopAndPushAsync(tempParam[1], tempParam[0], ScreenType.Single);
+        screenNavigation.ReloadScreenAsync();
     }
 }

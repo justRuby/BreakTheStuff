@@ -462,4 +462,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   screenNavigation: {fileID: 11400000, guid: db853ce6692633545b22c59359c44963, type: 2}
-  screenName: GameScreen
+  screenName: MenuScreen

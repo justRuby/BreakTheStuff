@@ -58,7 +58,7 @@ public class ScreenNavigation : ScriptableObject {
     public void PopAndPushAsync(string pushSceneName, string popSceneName, ScreenType screenType)
     {
         var lastIndex = screenList.Count - 1;
-        var popIndex = screenList.IndexOf(screenList.Where(x => x.Name == popSceneName).SingleOrDefault());
+        var popIndex = screenList.IndexOf(screenList.Where(x => x.Name == popSceneName).SingleOrDefault()) - 1;
 
         for (int i = lastIndex; i > popIndex; i--)
         {
@@ -78,5 +78,10 @@ public class ScreenNavigation : ScriptableObject {
         }
 
         screenList.Add(new BTSScreen(pushSceneName, screenType));
+    }
+
+    public void ReloadScreenAsync()
+    {
+        SceneManager.LoadSceneAsync(screenList[screenList.Count - 1].Name);
     }
 }

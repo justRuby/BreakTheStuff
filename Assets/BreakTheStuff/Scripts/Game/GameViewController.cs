@@ -7,22 +7,31 @@ using BreakTheStuff.Game;
 
 public class GameViewController : MonoBehaviour {
 
-    
+    [Header("Parents")]
     [SerializeField] RectTransform parentHealth;
     [SerializeField] RectTransform parentSlab;
 
+    [Header("Prefabs")]
     [SerializeField] GameObject slabPrefab;
     [SerializeField] GameObject healthPrefab;
 
-    [SerializeField] GameObject topLayout;
-    [SerializeField] Text scoreText;
-
+    [Header("Layouts")]
+    [SerializeField] GameObject gameLayout;
     [SerializeField] GameObject loseLayout;
     [SerializeField] GameObject menuLayout;
-    [SerializeField] Text endScoreText;
-    [SerializeField] Text maxScoreReachText;
 
+    [Header("Text")]
+    [SerializeField] Text scoreText;
+    [SerializeField] Text endScoreText;
+
+    [Header("Player Data")]
     [SerializeField] PlayerScore playerScore;
+
+    [Header("Audio")]
+    [SerializeField] AudioSource audioSource;
+
+    [Header("Widget Controller")]
+    [SerializeField] WidgetNavigationManager widgetManager;
 
     private GameLogicController cgController;
 
@@ -83,14 +92,12 @@ public class GameViewController : MonoBehaviour {
 
         if (playerScore.Score < cgController.Player.Score)
         {
-            maxScoreReachText.text = "New max score";
             playerScore.Score = cgController.Player.Score;
         }
 
         endScoreText.text = cgController.Player.Score.ToString();
 
-        topLayout.SetActive(false);
-        loseLayout.SetActive(true);
+        widgetManager.PushWidget("WidgetLose");
     }
 
     #endregion
@@ -187,6 +194,7 @@ public class GameViewController : MonoBehaviour {
         result.GetComponent<RectTransform>().anchoredPosition = new Vector3(cgController.Slabs[x, y].LocalX, cgController.Slabs[x, y].LocalY, 0);
 
         result.GetComponent<Button>().onClick.AddListener(() => { cgController.OnSlabClicked(viewValueSlab[x, y]); });
+        result.GetComponent<Button>().onClick.AddListener(audioSource.Play);
         result.transform.Find("Text").GetComponent<Text>().text = cgController.Slabs[x, y].Index.ToString();
 
         result.transform.DOScale(1f, 0.8f).SetEase(Ease.OutQuint);
@@ -197,6 +205,5 @@ public class GameViewController : MonoBehaviour {
     public void OpenPauseMenu(bool value)
     {
         _isGameInPause = value;
-        menuLayout.SetActive(value);
     }
 }

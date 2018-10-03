@@ -1,19 +1,24 @@
 ﻿using UnityEngine;
 using DG.Tweening;
+using System;
 
 public class CanvasGroupFadeAnimation : MonoBehaviour {
 
     [SerializeField] CanvasGroup canvasGroup;
     [SerializeField] float speedAnimation;
 
-    private void OnEnable()
+    public void ShowAnimation()
     {
         canvasGroup.alpha = 0;
-        canvasGroup.DOFade(1.0f, speedAnimation).SetEase(Ease.Flash);
+        canvasGroup.DOFade(1.0f, speedAnimation).SetEase(Ease.InQuad);
     }
 
-    private void OnDisable()
+    public void HideAnimation(Action action)
     {
-        canvasGroup.DOFade(0, speedAnimation).SetEase(Ease.Flash);
+        canvasGroup.alpha = 1;
+        canvasGroup.DOFade(0, speedAnimation).SetEase(Ease.OutQuad).OnComplete(()=>
+        {
+            action();
+        });
     }
 }

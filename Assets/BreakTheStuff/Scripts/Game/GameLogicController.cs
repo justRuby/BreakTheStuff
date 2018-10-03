@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 using BreakTheStuff.Game.Models;
@@ -122,7 +121,7 @@ namespace BreakTheStuff.Game
                 if (Player.Score > 0 && Player.Score % 10 == 0)
                     MixingSlabs();
 
-                //if (_countSpawned < 10 && Player.Score % 10 == 0)
+                //if(_countSpawned < 10 && Random.Range(0, 100) < 20)
                 //    TeleportSlabs();
 
                 return;
